@@ -24,7 +24,12 @@ async def fetch_imgs(url, session, sleep_range):
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.read()
-                filename = os.path.join('images/', url.rpartition('/')[-1])
+                dirname = 'images'
+                if os.path.exists(dirname) and os.path.isdir:
+                    filename = os.path.join(dirname, url.rpartition('/')[-1])
+                else:
+                    os.mkdir(dirname)
+                    filename = os.path.join(dirname, url.rpartition('/')[-1])
                 try:
                     async with aiofiles.open(filename, 'wb') as f:
                         await f.write(data)
@@ -35,6 +40,7 @@ async def fetch_imgs(url, session, sleep_range):
                 print(f'Ошибка загрузки изображения {url}. Ответ сервера: {response.status}')
     except aiohttp.client_exceptions.ClientConnectorError:
         print('Сбой подключения к серверу при обращении по адресу: {}'.format(url))
+        # Попытка обработки сбоя подключения и повторный запрос к серверу
         sleep_range = (5, 10)
         async with aiohttp.ClientSession(trust_env=True) as session:
             task = asyncio.create_task(fetch_imgs(url, session, sleep_range))
@@ -61,13 +67,12 @@ async def fetch_html(url, session, sleep_range):
                 data = None
     except aiohttp.client_exceptions.ClientConnectorError:
         print(f'Сбой подключения к серверу при обращении по адресу: {url}')
-        data = None
-        # Попытка обработки сбоя подключения, но в итоге возвращается список в списке
-        # и обработка данных ломается
-        # sleep_range = (1, 5)
-        # async with aiohttp.ClientSession(trust_env=True) as session:
-        #     task = asyncio.create_task(fetch_html(url, session, sleep_range))
-        #     data = await asyncio.gather(task)
+        # Попытка обработки сбоя подключения и повторный запрос к серверу
+        sleep_range = (1, 5)
+        async with aiohttp.ClientSession(trust_env=True) as session:
+            task = asyncio.create_task(fetch_html(url, session, sleep_range))
+            data = await asyncio.gather(task)
+        data = data[0]
     finally:
         return data
 
