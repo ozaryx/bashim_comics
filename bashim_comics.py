@@ -1,20 +1,19 @@
 import asyncio
 import aiohttp
-import aiofiles
-import json
+# import aiofiles
+# import json
 import re
-import requests
+# import requests
 
 from bs4 import BeautifulSoup as BS
 from time import monotonic as mt
-
 """
 1. Получить список ссылок на странички комиксов
 2. Получить ссылку на картинку комиксов
 3. Скачать картинки по ссылкам
 """
 
-code= r'^<a href="(.*)"><.*'
+code = r'^<a href="(.*)"><.*'
 regexp = re.compile(code)
 
 URL_BASE = 'http://bash.im'
@@ -25,6 +24,7 @@ proxies = {
 }
 
 proxy = 'http://localhost:3128'
+
 
 async def fetch_album(year, session):
     global URL
@@ -37,6 +37,7 @@ async def fetch_album(year, session):
             return data
         print(f'Error fetching index {year}')
         return None
+
 
 async def fetch_html(year, session):
     global URL
@@ -56,6 +57,7 @@ async def fetch_html(year, session):
         print(f'Error fetching {url}. Response status: {response.status}')
         return None
 
+
 async def main(year):
     # Получить список ссылок
     async with aiohttp.ClientSession(trust_env=True) as session:
@@ -68,11 +70,10 @@ async def main(year):
     # print(data)
     # print(div.find_all('a'))
 
-            
+
 #     <div id = "calendar" >
 # <a href = "/comics/20180101" > <img src = "https://bash.im/img/ts/uv2b5ewuuqllndzi448160.png" width = "40" height = "40" > </a >
 # </div >
-
 
 #     # Скачать файлы
 #     async with aiohttp.ClientSession() as session:
@@ -87,4 +88,4 @@ print('Asynchronous requests')
 t = mt()
 year = 2017
 asyncio.run(main(year))
-print('Finishing in {} sec.'.format(mt()-t))
+print('Finishing in {} sec.'.format(mt() - t))
