@@ -39,8 +39,9 @@ async def fetch_imgs(url, session, sleep_range):
             else:
                 print(f'Ошибка загрузки изображения {url}. Ответ сервера: {response.status}')
     except aiohttp.client_exceptions.ClientConnectorError:
-        print('Сбой подключения к серверу при обращении по адресу: {}'.format(url))
+        print(f'Сбой подключения к серверу при обращении по адресу: {url}')
         # Попытка обработки сбоя подключения и повторный запрос к серверу
+        print(f'Пытаемся загрузить данные с адреса {url} снова')
         sleep_range = (5, 10)
         async with aiohttp.ClientSession(trust_env=True) as session:
             task = asyncio.create_task(fetch_imgs(url, session, sleep_range))
@@ -68,6 +69,7 @@ async def fetch_html(url, session, sleep_range):
     except aiohttp.client_exceptions.ClientConnectorError:
         print(f'Сбой подключения к серверу при обращении по адресу: {url}')
         # Попытка обработки сбоя подключения и повторный запрос к серверу
+        print(f'Пытаемся загрузить данные с адреса {url} снова')
         sleep_range = (1, 5)
         async with aiohttp.ClientSession(trust_env=True) as session:
             task = asyncio.create_task(fetch_html(url, session, sleep_range))
