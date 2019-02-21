@@ -14,7 +14,7 @@ CALENDAR_URL = BASE_URL.format('/comics-calendar/{}')
 
 async def fetch_imgs(url, session, sleep_range):
     """Получение и сохранение картинок комиксов
-    
+
     url - адрес картинки
     session - объект aiohttp.ClientSession
     sleep_range - кортеж, диапазон задержки запуска корутины
@@ -37,7 +37,8 @@ async def fetch_imgs(url, session, sleep_range):
                 except IOError:
                     print(f'Не могу записать файл: {filename}')
             else:
-                print(f'Ошибка загрузки изображения {url}. Ответ сервера: {response.status}')
+                print(
+                    f'Ошибка загрузки изображения {url}. Ответ сервера: {response.status}')
     except aiohttp.client_exceptions.ClientConnectorError:
         print(f'Сбой подключения к серверу при обращении по адресу: {url}')
         # Попытка обработки сбоя подключения и повторный запрос к серверу
@@ -51,7 +52,7 @@ async def fetch_imgs(url, session, sleep_range):
 async def fetch_html(url, session, sleep_range):
     """Получение списка ссылок на странички картинок комиксов
     и сами картинки
-    
+
     url - адрес картинки
     session - объект aiohttp.ClientSession
     sleep_range - кортеж, диапазон задержки запуска корутины
@@ -64,7 +65,8 @@ async def fetch_html(url, session, sleep_range):
                 data = BS(data, "html.parser")
                 # return data
             else:
-                print(f'Ошибка при заросе {url}. Response status: {response.status}')
+                print(
+                    f'Ошибка при заросе {url}. Response status: {response.status}')
                 data = None
     except aiohttp.client_exceptions.ClientConnectorError:
         print(f'Сбой подключения к серверу при обращении по адресу: {url}')
@@ -80,7 +82,7 @@ async def fetch_html(url, session, sleep_range):
 
 
 async def main(year):
-# Получение списка ссылок на странички комиксов
+    # Получение списка ссылок на странички комиксов
     url = CALENDAR_URL.format(year)
     sleep_range = (1, 2)
     async with aiohttp.ClientSession(trust_env=True) as session:
@@ -97,7 +99,7 @@ async def main(year):
             for elem in div.find_all('a'):
                 data.append(regexp.match(str(elem)).group(1))
             print(data[:10])
-        
+
         urls = [BASE_URL.format(elem) for elem in data[:10]]
         print(urls)
 
@@ -106,7 +108,7 @@ async def main(year):
     # Получение списка ссылок на картинки комиксов
         async with aiohttp.ClientSession(trust_env=True) as session:
             tasks = [asyncio.create_task(fetch_html(url, session, sleep_range))
-                    for url in urls]
+                     for url in urls]
             data = await asyncio.gather(*tasks)
 
         imgs = []
@@ -123,7 +125,7 @@ async def main(year):
     # Получение и сохранение картинок комиксов
         async with aiohttp.ClientSession(trust_env=True) as session:
             tasks = [asyncio.create_task(fetch_imgs(url, session, sleep_range))
-                    for url in imgs if url]
+                     for url in imgs if url]
             data = await asyncio.gather(*tasks)
 
 
