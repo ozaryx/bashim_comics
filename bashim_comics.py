@@ -121,10 +121,11 @@ async def main(year):
             if soup:
                 img = soup.find(id="cm_strip")
                 if img:
-                    code = r'^<img.*src="(.*)".*>'
-                    regexp = re.compile(code)
-                    data = regexp.match(str(img)).group(1)
-                    imgs.append(data)
+                    imgs.append(img.attrs["src"])
+                    # code = r'^<img.*src="(.*)".*>'
+                    # regexp = re.compile(code)
+                    # data = regexp.match(str(img)).group(1)
+                    # imgs.append(data)
         print(imgs)
 
         # Получение и сохранение картинок комиксов
