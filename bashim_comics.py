@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 import aiofiles
 import os
-import re
+# import re
 
 from bs4 import BeautifulSoup as BS
 from random import uniform
