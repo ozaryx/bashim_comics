@@ -100,7 +100,7 @@ async def main(year):
             # code = r'^<a href="(.*)"><.*'
             # regexp = re.compile(code)
             for elem in div.find_all('a'):
-                data.append(elem.attr['href'])
+                data.append(elem.attrs['href'])
                 # data.append(regexp.match(str(elem)).group(1))
             print(data[:10])
 
