@@ -37,8 +37,7 @@ async def fetch_imgs(url, session, sleep_range):
                 except IOError:
                     print(f'Не могу записать файл: {filename}')
             else:
-                print(
-                    f'Ошибка загрузки изображения {url}. Ответ сервера: {response.status}')
+                print(f'Ошибка загрузки изображения {url}. Ответ сервера: {response.status}')
     except aiohttp.client_exceptions.ClientConnectorError:
         print(f'Сбой подключения к серверу при обращении по адресу: {url}')
         # Попытка обработки сбоя подключения и повторный запрос к серверу
@@ -47,6 +46,8 @@ async def fetch_imgs(url, session, sleep_range):
         async with aiohttp.ClientSession(trust_env=True) as session:
             task = asyncio.create_task(fetch_imgs(url, session, sleep_range))
             data = await asyncio.gather(task)
+    except aiohttp.client_exceptions.ClientHttpProxyError:
+        print(f'Сбой подключения к серверу через прокси при обращении по адресу: {url}')
 
 
 async def fetch_html(url, session, sleep_range):
@@ -65,8 +66,7 @@ async def fetch_html(url, session, sleep_range):
                 data = BS(data, "html.parser")
                 # return data
             else:
-                print(
-                    f'Ошибка при заросе {url}. Response status: {response.status}')
+                print(f'Ошибка при заросе {url}. Response status: {response.status}')
                 data = None
     except aiohttp.client_exceptions.ClientConnectorError:
         print(f'Сбой подключения к серверу при обращении по адресу: {url}')
@@ -77,6 +77,9 @@ async def fetch_html(url, session, sleep_range):
             task = asyncio.create_task(fetch_html(url, session, sleep_range))
             data = await asyncio.gather(task)
         data = data[0]
+    except aiohttp.client_exceptions.ClientHttpProxyError:
+        print(f'Сбой подключения к серверу через прокси при обращении по адресу: {url}')
+        data = None
     finally:
         return data
 
@@ -94,21 +97,23 @@ async def main(year):
         div = soup.find(id="calendar")
         if div:
             data = []
-            code = r'^<a href="(.*)"><.*'
-            regexp = re.compile(code)
+            # code = r'^<a href="(.*)"><.*'
+            # regexp = re.compile(code)
             for elem in div.find_all('a'):
-                data.append(regexp.match(str(elem)).group(1))
+                data.append(elem.attr['href'])
+                # data.append(regexp.match(str(elem)).group(1))
             print(data[:10])
 
         urls = [BASE_URL.format(elem) for elem in data[:10]]
         print(urls)
 
-    # Установим диапазон случайной задержки для избежания шторма запросов на сервер
+        # Установим диапазон случайной задержки для избежания шторма запросов на сервер
         sleep_range = (2, 5)
-    # Получение списка ссылок на картинки комиксов
+        # Получение списка ссылок на картинки комиксов
         async with aiohttp.ClientSession(trust_env=True) as session:
-            tasks = [asyncio.create_task(fetch_html(url, session, sleep_range))
-                     for url in urls]
+            tasks = [
+                asyncio.create_task(fetch_html(url, session, sleep_range)) for url in urls
+            ]
             data = await asyncio.gather(*tasks)
 
         imgs = []
@@ -122,10 +127,11 @@ async def main(year):
                     imgs.append(data)
         print(imgs)
 
-    # Получение и сохранение картинок комиксов
+        # Получение и сохранение картинок комиксов
         async with aiohttp.ClientSession(trust_env=True) as session:
-            tasks = [asyncio.create_task(fetch_imgs(url, session, sleep_range))
-                     for url in imgs if url]
+            tasks = [
+                asyncio.create_task(fetch_imgs(url, session, sleep_range)) for url in imgs if url
+            ]
             data = await asyncio.gather(*tasks)
 
 
